@@ -5,12 +5,13 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     SECRET_KEY = "naeb"
     WEB_ADMIN = '157318439@qq.com'
+    MAIL_USE_SSL = True
     MAIL_SERVER = "smtp.qq.com"
     MAIL_PORT = 465
     MAIL_USERNAME = ""
     MAIL_PASSWORD = ""
-    FLASK_MAIL_SENDER = ""
-    FLASK_MAIL_SUBJECT_PREFIX = "[知了]"
+    FLASK_MAIL_SENDER = "书匣子<157318439@qq.com>"
+    FLASK_MAIL_SUBJECT_PREFIX = "[书匣子]"
 
 class TestingConfig(BaseConfig):
     DEBUG = True
