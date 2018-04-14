@@ -14,7 +14,7 @@ from .models import User, Role
 user_datastore = SQLAlchemySessionUserDatastore(db, User, Role)
 security = Security()
 
-admin = Admin(name='Bean')
+# admin = Admin(name='后台管理系统')
 
 def creat_app():
     '''
