@@ -36,13 +36,25 @@ class UserApi(Resource):
 
 class NovelByApi(Resource):
     '''
-    通过id获取小说
+    通过id获取小说以及发表评论
     '''
     def get(self, id):
         novel = Novel.query.filter_by(id=id).first()
         if novel is None:
             return Error.page_not_found
         return jsonify(novel.to_json())
+
+    @auth.login_required
+    def post(self, id):
+        '''
+        发表对小说的评论
+        :param id-> 指定小说ID
+        '''
+        args = self.parser.parse_args()
+        comment = Comment(content=args['comment'], novel=id, audienc=g.current_user)
+        db.session.add(comment)
+        db.session.commit()
+        return {'status': 200}
 
 class NovelApi(Resource):
     '''
@@ -70,3 +82,52 @@ class NovelApi(Resource):
         TODO:
         当用户点击小说详情页面时需要验证是否处于登录状态
         '''
+
+class CommentByApi(Resource):
+    '''
+    通过小说ID获取对应的评论
+    '''
+    def get(self, id):
+        comment = Comment.query.filter_by(id=id).first()
+        if comment is None:
+            return Error.page_not_found
+        return jsonify(comment.to_json())
+
+class DeleteCommentApi(Resource):
+    '''
+    删除指定评论
+    '''
+    @auth.login_required
+    def delete(self, id):
+        if g.current_user != Comment.query(audienc).filter_by(id=id).first()
+            return Error.forbidden
+        comment = Comment.query.filter_by(id=id).first()
+        if comment is None:
+            return Error.page_not_found
+        db.session.delete(comment)
+        db.session.commit()
+        return {'status': 200}
+
+
+
+class TokenApi(Resource):
+    '''
+    生成验证令牌
+    '''
+    @auth.login_required
+    def get(self):
+        if g.current_user.is_anonymous or g.token_used:
+            return False
+        return jsonify({
+            'token': g.current_user.generate_auth_token(expiration=43200).decode('utf-8'),
+            'expiration': 43200
+        })
+
+restful_api.add_resource(UserByApi, '/user/<int:id>')
+restful_api.add_resource(UserApi, '/user')
+restful_api.add_resource(NovelByApi, '/novel/<int:id>')
+restful_api.add_resource(NovelApi, '/novel')
+restful_api.add_resource(CommentByApi, '/comment/<int:id>')
+restful_api.add_resource(DeleteCommentApi, '/comment/delete/<int:id>')
+restful_api.add_resource(TokenApi, '/token')
+
