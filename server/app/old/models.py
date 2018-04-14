@@ -4,8 +4,8 @@ import hashlib
 from werkzeug.security import generate_password_hash,check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask_login import UserMixin, AnonymousUserMixin
-from flask import current_app, request, url_for, jsonify
-from . import db
+from flask import current_app, request
+from . import db, login_manager
 
 class Role(db.Model):
     '''
@@ -89,7 +89,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64), unique=True, index=True)
     nickname = db.Column(db.String, unique=True,index=True)
     sex = db.Column(db.String, default='Man')
-    password_hash = db.Column(db.String(128))
+    pwd_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     confirmed = db.Column(db.Boolean, default=False) #验证Token
     join_time = db.Column(db,DateTime, default=datetime.utcnow)
@@ -191,7 +191,7 @@ class User(UserMixin, db.Model):
         raise AttributeError('密码不可访问')
     @password.setter
     def password(self, password):
-        self.password_hash = generate_password_hash(password)
+        self.pwd_hash = generate_password_hash(password)
 
     def verify_password(self, password):
         '''
@@ -199,7 +199,7 @@ class User(UserMixin, db.Model):
         :param password-> 用户密码
         :return 验证成功返回True,否则返回False
         '''
-        return check_password_hash(self.password_hash, password)
+        return check_password_hash(self.pwd_hash, password)
 
     def generate_confirmation_token(self, expiration=43200):
         '''
@@ -265,30 +265,6 @@ class User(UserMixin, db.Model):
             url=url, hash=_hash, size=size, default=default, rating=rating
         )
 
-    @property
-    def user_follower(self):
-        '''
-        用户关注的所有人
-        '''
-        return User.query.join(Follow, Follow.followed_id == User.id).filter(Follow.follower_id == self.id)
-
-    @property
-    def user_followed(self):
-        '''
-        用户所有粉丝
-        '''
-        return User.query.join(Follow, Follow.follower_id == User.id).filter(Follow.followed_id == self.id)
-
-    @property
-    def user_collects(self):
-        '''
-        用户收藏的所有小说
-        '''
-        return Novel.query.join(Collect, Collect.collected_id == Novel.id).filter(Collect.collecter_id == self.id)
-    
-    def __repr__(self):
-        return '<User %r>' % self.nickname
-
 class AnonymousUser(AnonymousUserMixin):
     '''
     匿名用户(游客)
@@ -305,17 +281,17 @@ class AnonymousUser(AnonymousUserMixin):
     def is_admin(Self):
         return False
 
-# #给未登录用户赋予游客模型
-# login_manager.anonymous_user = AnonymousUser
+#给未登录用户赋予游客模型
+login_manager.anonymous_user = AnonymousUser
 
-# @login_manager.user_loader
-# def load_user(user_id):
-#     '''
-#     用户登录时的回调函数,用于指定标识符加载用户
-#     :param user_id-> 用户id
-#     :return 查询到的用户对象
-#     '''
-#     return User.query.get(int(user_id))
+@login_manager.user_loader
+def load_user(user_id):
+    '''
+    用户登录时的回调函数,用于指定标识符加载用户
+    :param user_id-> 用户id
+    :return 查询到的用户对象
+    '''
+    return User.query.get(int(user_id))
 
 class Novel(db.Model):
     '''
@@ -347,16 +323,6 @@ class Novel(db.Model):
             return True
         return False
 
-    def to_json(self):
-        return {
-            'title': self.title,
-            'autor': self.author,
-            'content': self.content,
-            'updata_time': self.update_time,
-            'comments_count': self.comments.count()
-            'collecters_count': self.collecters.count()
-        }
-         
 
 class Comment(db.Model):
     '''
