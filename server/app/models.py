@@ -9,7 +9,7 @@ from . import db, login_manager
 
 class Role(db.Model):
     '''
-    定义角色和权限
+    定义角色和权限的Model
     '''
     __tablename__ = 'roles'
 
@@ -22,16 +22,16 @@ class Role(db.Model):
     @staticmethod
     def update_roles():
         '''
-        # 0 -> 管理员：拥有全部权限
-        # 1 -> 用户：用户权限
-        # 2 -> 匿名：未登录的用户,无法查看详情,只能查看列表
+        # 0xff -> 管理员：拥有全部权限
+        # 0x07 -> 用户：用户权限
+        # 0x00 -> 匿名：未登录的用户,无法查看详情,只能查看列表
         '''
         roles = {
             'User': (Permissions.DETAIL | 
                      Permissions.COLLECT |
                      Permissions.COMMENT |
                      Permissions.FOLLOW, True),
-            'Admin': (0, False)
+            'Admin': (0xff, False)
         }
         for r in roles:
             role = Role.query.filter_by(name=r).first()
@@ -44,7 +44,7 @@ class Role(db.Model):
 
 class Follow(db.Model):
     '''
-    关注者/被关注者
+    关注者/被关注者的Model
     '''
     __tablename__ = 'follows'
 
@@ -55,16 +55,29 @@ class Follow(db.Model):
     # 关注时间
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+class Collect(db.Model):
+    '''
+    小说收藏Model
+    '''
+    __tablename__ = 'collects'
+
+    #收藏者用户ID
+    collecter_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    #被收藏的小说ID
+    collected_id = db.Column(db.Integer, db.ForeignKey('novels.id'), primary_key=True)
+    #收藏时间
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
 class User(UserMixin, db.Model):
     '''
-    用户
+    用户Model
     '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if not self.role:
             #管理员
             if self.email == current_app.config['WEB_ADMIN']:
-                self.role = Role.query.filter_by(permissions=0).first()
+                self.role = Role.query.filter_by(permissions=0xff).first()
             else:
                 self.role = Role.query.filter_by(default=True).first()
         if self.email is not None and self.avatar_hash is None:
@@ -82,18 +95,28 @@ class User(UserMixin, db.Model):
     join_time = db.Column(db,DateTime, default=datetime.utcnow)
     last_seen = db.Column(db,DateTime, default=datetime.utcnow)
     avatar_hash = db.Column(db.String(32))
-    collect_books = db.relationship('Book', backref='audience', lazy='dynamic')  #与小说的关系->读者
 
+    #用户关注的
     followed = db.relationship('Follow', 
                                 foreign_keys=[Follow.follower_id],
                                 backref=db.backref('follower', lazy='joined'),
                                 lazy='dynamic',
                                 cascade='all, delete-orphan')
+
+    #用户被关注
     followers = db.relationship('Follow', 
                                 foreign_keys=[Follow.followed_id],
-                                backref=db.backref('follower', lazy='joined'),
+                                backref=db.backref('followed', lazy='joined'),
                                 lazy='dynamic',
                                 cascade='all, delete-orphan')
+
+    #用户收藏的小说
+    collected = db.relationship('Collect', 
+                                foreign_keys=[Collect.collecter_id],
+                                backref=db.backref('collecter', lazy='joined'),
+                                lazy='dynamic',
+                                cascade='all, delete-orphan')
+
     comments = db.relationship('Comment',backref='audience', lazy='dynamic')
     
     def set_follow(self, user):
@@ -133,6 +156,35 @@ class User(UserMixin, db.Model):
         if self.followers.filter_by(follower_id=user.id).first():
             return True
         return False
+
+    def set_collect(self, novel):
+        '''
+        收藏小说
+        :param novel-> 指定小说
+        '''
+        if not self.is_collecting(user):
+            f = Follow(follower=self, followed=user)
+            db.session.add(f)  
+
+    def set_uncollect(self, novel):
+        '''
+        取消收藏小说
+        :param novel-> 指定小说
+        '''
+        f = self.collected.filter_by(collected_id=novel.id).first()
+        if f:
+            db.session.delete(f)
+
+    def is_collecting(self, novel):
+        '''
+        是否收藏了某本小说
+        :param novel-> 指定小说
+        return 已收藏返回True,否则返回False
+        '''
+        if self.collected.filter_by(collected_id=novel.id).first()
+            return True
+        return False
+    
 
     @property
     def password(self):
@@ -184,6 +236,121 @@ class User(UserMixin, db.Model):
         return self.role is not None and (self.role.permissions & permissions) == permissions
 
     @property
+    def is_admin(self):
+        '''
+        判断是否为管理员
+        :return 是返回True,否则返回False
+        '''
+        return self.power(Permission.ADMIN)
     
-    
-    
+    def update_last_seen(self):
+        '''
+        更新最后一次登录时间
+        '''
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
+
+    def gravatar(self, size=100, default='identicon', rating='g'):
+        '''
+        利用哈希值生成头像
+        :param size->头像大小
+        :return 头像链接
+        '''
+        if request.is_secure:
+            url = 'https://secure.gravatar.com/avatar'
+        else:
+            url = 'http://www.gravatar.com/avatar'
+        _hash = self.avatar_hash or hashlib.md5(self.email.encode('utf-8')).hexdigest()
+        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
+            url=url, hash=_hash, size=size, default=default, rating=rating
+        )
+
+class AnonymousUser(AnonymousUserMixin):
+    '''
+    匿名用户(游客)
+    '''
+    def power(self, permissions):
+        '''
+        游客没有任何权限
+        :param permissions->指定权限
+        :return False->无权限
+        '''
+        return False
+
+    @property
+    def is_admin(Self):
+        return False
+
+#给未登录用户赋予游客模型
+login_manager.anonymous_user = AnonymousUser
+
+@login_manager.user_loader
+def load_user(user_id):
+    '''
+    用户登录时的回调函数,用于指定标识符加载用户
+    :param user_id-> 用户id
+    :return 查询到的用户对象
+    '''
+    return User.query.get(int(user_id))
+
+class Novel(db.Model):
+    '''
+    小说Model
+    '''
+    __tablename__ = 'novels'
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String, index=True)
+    author = db.Column(db.String, index=True)
+    content = db.Column(db.Text)
+    update_time = db.Column(db.String,index=True)  #这里的时间由爬虫抓取小说入库时写入
+    comments = db.relationship('Comment', backref='novel', lazy='dynamic')  
+
+    #小说被收藏
+    collecters = db.relationship('Collect', 
+                                foreign_keys=[Collect.collected_id],
+                                backref=db.backref('collected', lazy='joined'),
+                                lazy='dynamic',
+                                cascade='all, delete-orphan') 
+
+    def is_collected_by(self, user):
+        '''
+        是否被某用户收藏
+        :param user-> 指定用户
+        return 已被收藏返回True,否则返回False
+        '''
+        if self.collecters.filter_by(collecter_id=user.id).first():
+            return True
+        return False
+
+
+class Comment(db.Model):
+    '''
+    用户评论小说的Model
+    '''
+    __tablename__ = 'comments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    disabled = db.Column(db.Boolean)
+    audienc_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    novel_id = db. Column(db.Integer, db.ForeignKey('novels.id'))
+
+    def to_json(Self):
+        return {
+            'commentTime': self.timestamp,
+            'comment': self.content,
+            'novelID': self.novel_id,
+            'audienceID': self.audienc_id
+        }
+
+class Permission:
+    '''
+    权限类，用于指定权限常量。
+    '''
+    DETAIL = 0x01           #阅读小说内容
+    COLLECT = 0x02          #收藏小说
+    COMMENT = 0x04          #对小说发表评论
+    FOLLOW = 0x08           #关注其他用户
+    ADMIN = 0X80            #管理网站->最高权限
