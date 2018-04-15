@@ -327,6 +327,7 @@ class Novel(db.Model):
     title = db.Column(db.String, index=True)
     author = db.Column(db.String, index=True)
     content = db.Column(db.Text)
+    synopsis = db.Column(db.Text)                  #摘要
     update_time = db.Column(db.String,index=True)  #这里的时间由爬虫抓取小说入库时写入
     comments = db.relationship('Comment', backref='novel', lazy='dynamic')  
 
@@ -356,6 +357,26 @@ class Novel(db.Model):
             'comments_count': self.comments.count()
             'collecters_count': self.collecters.count()
         }
+
+    def to_list_json(self):
+        return {
+            'title': self.title,
+            'autor': self.author,
+            'synopsis': self.synopsis,
+            'updata_time': self.update_time,
+            'comments_count': self.comments.count()
+            'collecters_count': self.collecters.count()
+        }
+    
+    def to_sub_json(self):
+        return {
+            'title': self.title,
+            'autor': self.author,
+            'content': "请登录后阅读小说",
+            'updata_time': self.update_time,
+            'comments_count': self.comments.count()
+            'collecters_count': self.collecters.count()
+        }       
          
 
 class Comment(db.Model):

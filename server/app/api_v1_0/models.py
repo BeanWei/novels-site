@@ -38,11 +38,15 @@ class NovelByApi(Resource):
     '''
     通过id获取小说以及发表评论
     '''
+    @auth.login_required
     def get(self, id):
-        novel = Novel.query.filter_by(id=id).first()
-        if novel is None:
-            return Error.page_not_found
-        return jsonify(novel.to_json())
+        if g.current_user != "":
+            novel = Novel.query.filter_by(id=id).first()
+            if novel is None:
+                return Error.page_not_found
+            return jsonify(novel.to_json())
+        else:
+            return jsonify(novel.to_sub_json())
 
     @auth.login_required
     def post(self, id):
@@ -58,7 +62,7 @@ class NovelByApi(Resource):
 
 class NovelApi(Resource):
     '''
-    获取所有小说以及阅读小说
+    获取所有小说
     '''
     def __init__(self):
         self.parser = reqparse.RequestParser()
@@ -72,16 +76,8 @@ class NovelApi(Resource):
         if novels is None:
             return Error.page_not_found
         return jsonify(
-           {'novel':[novel.to_json() for novel in novels]}
+           {'novel':[novel.to_list_json() for novel in novels]}
         )
-    
-    @auth.login_required
-    def seeNovel(self):
-        args = self.parser.parse_args()
-        '''
-        TODO:
-        当用户点击小说详情页面时需要验证是否处于登录状态
-        '''
 
 class CommentByApi(Resource):
     '''
