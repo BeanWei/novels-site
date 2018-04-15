@@ -119,6 +119,8 @@ class TokenApi(Resource):
             'expiration': 43200
         })
 
+
+
 restful_api.add_resource(UserByApi, '/user/<int:id>')
 restful_api.add_resource(UserApi, '/user')
 restful_api.add_resource(NovelByApi, '/novel/<int:id>')
