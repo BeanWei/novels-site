@@ -19,7 +19,7 @@ def login():
             login_user(user, form.remember_me.data)
             return redirect(request.args.get('next') or url_for(main.index))
         flash('账户或密码错误')
-    return render_template('auth/login.html', form=form)
+    return render_template('user/login.html', form=form)
 
 @user.route('/logou')
 @login_required
@@ -49,14 +49,14 @@ def signin():
         send_mail(
             user.email,
             '确认您的账户',
-            template = 'auth/email/confirm.html',
+            template = 'user/email/confirm.html',
             user = user,
             token = token
         )
         db.session.add(user)
         db.session.commit()
-        return redirect(url_for('auth.unconfirmed'))
-    return render_template('auth/signin.html', form=form)
+        return redirect(url_for('user.unconfirmed'))
+    return render_template('user/signin.html', form=form)
 
 @user.before_app_request
 def before_request():
@@ -66,7 +66,7 @@ def before_request():
     if current_user.is_authenticated:
         current_user.update_last_seen()
         if not current_user.confirmed and request.endpoint[:5] != 'user.':
-            return redirect(url_for('auth.unconfirmed'))
+            return redirect(url_for('user.unconfirmed'))
 
 @user.route('/confirm/<token>')
 @login_required
@@ -88,7 +88,7 @@ def unconfirmed():
     账户未确认
     账户注册以后会立即跳转到这里
     '''
-    return render_template('auth/unconfirmed.html')
+    return render_template('user/unconfirmed.html')
 
 @user.route('/confirm'):
 @login_required
@@ -99,7 +99,7 @@ def redend_confirmation():
     token =- current_user.generate_confirmation_token()
     send_mail(
         current_user.email,
-        template = 'auth/email/confirm.html',
+        template = 'user/email/confirm.html',
         user = current_user,
         token = token
     )
@@ -117,9 +117,9 @@ def changepwd(email):
     if current_user == _email and form.validate_on_submit():
         if not _email.verify_password(form.old_password.data):
             flash('原密码错误')
-            return redirect(url_for('auth.changepwd', email=email))
+            return redirect(url_for('user.changepwd', email=email))
         _email.password = form.new_password.data
         db.session.add(_email)
         db.session.commit()
         flash('密码修改成功')
-    return render_template('auth/changepwd/html', form=form)
+    return render_template('user/changepwd.html', form=form)
