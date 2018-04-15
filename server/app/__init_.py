@@ -16,7 +16,7 @@ security = Security()
 
 # admin = Admin(name='后台管理系统')
 
-def creat_app():
+def create_app():
     '''
     工厂函数，创建APP实例
     :return app实例
