@@ -117,7 +117,8 @@ class User(UserMixin, db.Model):
                                 lazy='dynamic',
                                 cascade='all, delete-orphan')
 
-    comments = db.relationship('Comment',backref='audience', lazy='dynamic')
+    comments = db.relationship('Comment', backref='audience', lazy='dynamic')
+    novels = db.relationship('Novel', backref='author', lazy='dynamic')
     
     def set_follow(self, user):
         '''
@@ -335,7 +336,7 @@ class Novel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, index=True)
-    author = db.Column(db.String, index=True)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True)
     content = db.Column(db.Text)
     synopsis = db.Column(db.Text)                  #摘要
     update_time = db.Column(db.String,index=True)  #这里的时间由爬虫抓取小说入库时写入
@@ -361,7 +362,7 @@ class Novel(db.Model):
     def to_json(self):
         return {
             'title': self.title,
-            'autor': self.author,
+            'autor': self.author_id,
             'content': self.content,
             'updata_time': self.update_time,
             'comments_count': self.comments.count()
@@ -371,7 +372,7 @@ class Novel(db.Model):
     def to_list_json(self):
         return {
             'title': self.title,
-            'autor': self.author,
+            'autor': self.author_id,
             'synopsis': self.synopsis,
             'updata_time': self.update_time,
             'comments_count': self.comments.count()
@@ -381,7 +382,7 @@ class Novel(db.Model):
     def to_sub_json(self):
         return {
             'title': self.title,
-            'autor': self.author,
+            'autor': self.author_id,
             'content': "请登录后阅读小说",
             'updata_time': self.update_time,
             'comments_count': self.comments.count()

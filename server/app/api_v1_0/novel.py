@@ -36,7 +36,7 @@ def get_novel_detail():
         return jsonify(re_code=RET.OK, msg='查询成功', novel=novel_detail)
     else:
         novel_detail = novel.to_json()
-        return jsonify(re_code=RET.OK, msg='查询成功', novel=user_info)
+        return jsonify(re_code=RET.OK, msg='查询成功', novel=novel_detail)
 
 @api.route('/novels/<int:novel_id>/comments'):
 def get_novel_comments():
@@ -47,8 +47,11 @@ def get_novel_comments():
         current_app.logger.debug(e)
         return jsonify(re_code=RET.DBERR, msg='查询小说失败')
     if not novel:
-        return jsonify(re_code=RET.NODATA, msg='小说不存在')
-    #TODO: 连表查询  
+        return jsonify(re_code=RET.NODATA, msg='小说不存在')   
+    comments = Comment.query.filter_by(novel_id=novel_id).all()
+    comment_list = [comment.to_json() for comment in comments]
+
+    return jsonify(re_code=RET.OK, msg='查询小说评论成功', comments=comment_list)
       
 @api.route('/novels/<int:novel_id>', methods=['POST']):
 @login_required
@@ -79,6 +82,8 @@ def make_comment():
     except Exception as e:
         current_app.logger.debug(e)
         db.session.rollback()
+        return jsonify(re_code=RET.DBERR, msg='评论发表失败')
+    else:
         return jsonify(re_code=RET.OK, msg='评论发表成功')
 
 

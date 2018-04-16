@@ -23,19 +23,19 @@ def get_user_info():
     if not user:
         return jsonify(re_code=RET.NODATA, msg='用户不存在')
     #TODO: 连表查询与user相关的信息
-    user_comments = user.comments      #评论
-    user_followed = user.followed      #关注
-    user_follower = user.follower      #粉丝
-    user_collected = user.collected    #收藏的小说
+    # user_comments = user.comments      #评论
+    # user_followed = user.followed      #关注
+    # user_follower = user.follower      #粉丝
+    # user_collected = user.collected    #收藏的小说
     user_profile= user.to_json()
-    user_info = {
-        'user': user_profile,
-        'comments': user_comments,
-        'followed': user_followed,
-        'follower': user_follower,
-        'collected': user_collected
-    }
-    return jsonify(re_code=RET.OK, msg='查询成功', user=user_info)
+    # user_info = {
+    #     'user': user_profile,
+    #     'comments': user_comments,
+    #     'followed': user_followed,
+    #     'follower': user_follower,
+    #     'collected': user_collected
+    # }
+    return jsonify(re_code=RET.OK, msg='查询成功', user=user_profile)
 
 @api.route('/user/<int:user_id>', methods=['PUT'])
 @login_required
