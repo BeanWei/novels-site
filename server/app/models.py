@@ -191,6 +191,7 @@ class User(UserMixin, db.Model):
         raise AttributeError('密码不可访问')
     @password.setter
     def password(self, password):
+        '''生成hash密码'''
         self.password_hash = generate_password_hash(password)
 
     def verify_password(self, password):
@@ -286,6 +287,15 @@ class User(UserMixin, db.Model):
         '''
         return Novel.query.join(Collect, Collect.collected_id == Novel.id).filter(Collect.collecter_id == self.id)
     
+    def to_json(self):
+        '''返回用户信息'''
+        return {
+            'user_id': self.id,
+            'nickname': self.nickname,
+            'email': self.email,
+            'avatar_url': self.avatar_hash
+        }
+
     def __repr__(self):
         return '<User %r>' % self.nickname
 
