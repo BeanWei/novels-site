@@ -12,6 +12,12 @@ migrate = Migrate(app, db)
 def make_shell_context():
     return dict(app=app, db=db, User=User, Role=Role, Novel=Novel)
 
+'''
+数据库迁移指令
+python manage.py db init
+python manage.py db migrate
+python manage.py db upgrade
+'''
 manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
