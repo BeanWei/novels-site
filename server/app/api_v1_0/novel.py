@@ -7,7 +7,7 @@ from app.models import Novel, Comment
 from app.utils.common import login_required
 from app.utils.response_code import RET
 
-@api.route('/novels'):
+@api.route('/novels')
 def get_novels():
     '''获取所有小说'''
     try:
@@ -20,7 +20,7 @@ def get_novels():
     novels = [novel.to_list_json() for novel in novels]
     return jsonify(re_code=RET.OK, msg='查询小说成功', novels=novels)
 
-@api.route('/novels/<int:novel_id>'):
+@api.route('/novels/<int:novel_id>')
 @login_required
 def get_novel_detail():
     '''获取单本小说内容,需要登录才可以查看'''
@@ -38,8 +38,8 @@ def get_novel_detail():
         novel_detail = novel.to_json()
         return jsonify(re_code=RET.OK, msg='查询成功', novel=novel_detail)
 
-@api.route('/novels/<int:novel_id>/comments'):
-def get_novel_comments():
+@api.route('/novels/<int:novel_id>/comments')
+def get_novel_comments(novel_id):
     '''获取单本小说的评论内容,无需登录'''
     try:
         novel = Novel.query.get(novel_id)
@@ -53,7 +53,7 @@ def get_novel_comments():
 
     return jsonify(re_code=RET.OK, msg='查询小说评论成功', comments=comment_list)
       
-@api.route('/novels/<int:novel_id>', methods=['POST']):
+@api.route('/novels/<int:novel_id>', methods=['POST'])
 @login_required
 def make_comment():
     '''评论单本小说, 需要登录'''

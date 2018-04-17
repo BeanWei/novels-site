@@ -1,7 +1,7 @@
 import os
 
 from app import create_app, db
-from app.models import User, Role, Novel
+from app import models
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 
@@ -10,7 +10,7 @@ manager = Manager(app)
 migrate = Migrate(app, db)
 
 def make_shell_context():
-    return dict(app=app, db=db, User=User, Role=Role, Novel=Novel)
+    return dict(app=app, db=db, User=models.User, Role=models.Role, Novel=models.Novel, Comment=models.Comment)
 
 '''
 数据库迁移指令
@@ -31,3 +31,4 @@ def deploy():
 
 if __name__ == "__main__":
     manager.run()
+

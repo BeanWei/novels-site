@@ -4,7 +4,7 @@ from flask_login import current_user
 from werkzeug.routing import BaseConverter
 from .response_code import RET
 
-from app.models import Permission
+# from app.models import Permission
 
 class RegexConverter(BaseConverter):
     ''' U - N - U -S - E - D
@@ -35,25 +35,26 @@ def login_required(view_func):
 
     return wrapper
 
-def permission_required(permission):
-    '''
-    权限验证装饰器
-    :param permission-> 指定权限
-    :return 装饰器
-    '''
-    def decorator(f):
-        @wraps(f)
-        def inner(*args, **kwargs):
-            if not current_user.power(permission):
-                abort(403)
-            return f(*args, **kwargs)
-        return inner
-    return decorator
+#TODO: 权限验证
+# def permission_required(permission):
+#     '''
+#     权限验证装饰器
+#     :param permission-> 指定权限
+#     :return 装饰器
+#     '''
+#     def decorator(f):
+#         @wraps(f)
+#         def inner(*args, **kwargs):
+#             if not current_user.power(permission):
+#                 abort(403)
+#             return f(*args, **kwargs)
+#         return inner
+#     return decorator
 
-def admin_required(view_func):
-    '''
-    管理员权限验证
-    :param view_func-> 视图方法
-    :return 装饰器
-    '''
-    return permission_required(Permission.ADMIN)(f)
+# def admin_required(view_func):
+#     '''
+#     管理员权限验证
+#     :param view_func-> 视图方法
+#     :return 装饰器
+#     '''
+#     return permission_required(Permission.ADMIN)(f)

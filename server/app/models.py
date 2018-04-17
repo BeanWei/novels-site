@@ -14,10 +14,10 @@ class Role(db.Model):
     __tablename__ = 'roles'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=True)
+    name = db.Column(db.String(32), unique=True)
     default = db.Column(db.Boolean, default=False, index=True)
     permissions = db.Column(db.Integer)
-    users = db.relationship('user', backref='role', lazy='dynamic')
+    users = db.relationship('User', backref='role', lazy='dynamic')
 
     @staticmethod
     def update_roles():
@@ -87,13 +87,13 @@ class User(UserMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), unique=True, index=True)
-    nickname = db.Column(db.String, unique=True,index=True)
-    sex = db.Column(db.String, default='Man')
+    nickname = db.Column(db.String(32), unique=True,index=True)
+    sex = db.Column(db.String(10), default='Man')
     password_hash = db.Column(db.String(128))
-    #role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     confirmed = db.Column(db.Boolean, default=False) #验证Token
-    join_time = db.Column(db,DateTime, default=datetime.utcnow)
-    last_seen = db.Column(db,DateTime, default=datetime.utcnow)
+    join_time = db.Column(db.DateTime, default=datetime.utcnow)
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     avatar_hash = db.Column(db.String(32))
 
     #用户关注的
@@ -336,11 +336,11 @@ class Novel(db.Model):
     __tablename__ = 'novels'
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String, index=True)
+    title = db.Column(db.Text)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True)
     content = db.Column(db.Text)
     synopsis = db.Column(db.Text)                  #摘要
-    update_time = db.Column(db.String,index=True)  #这里的时间由爬虫抓取小说入库时写入
+    update_time = db.Column(db.String(255),index=True)  #这里的时间由爬虫抓取小说入库时写入
     comments = db.relationship('Comment', backref='novel', lazy='dynamic')  
 
     #小说被收藏
