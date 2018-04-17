@@ -182,7 +182,7 @@ class User(UserMixin, db.Model):
         :param novel-> 指定小说
         return 已收藏返回True,否则返回False
         '''
-        if self.collected.filter_by(collected_id=novel.id).first()
+        if self.collected.filter_by(collected_id=novel.id).first():
             return True
         return False
     
@@ -366,7 +366,7 @@ class Novel(db.Model):
             'autor': self.author_id,
             'content': self.content,
             'updata_time': self.update_time,
-            'comments_count': self.comments.count()
+            'comments_count': self.comments.count(),
             'collecters_count': self.collecters.count()
         }
 
@@ -376,7 +376,7 @@ class Novel(db.Model):
             'autor': self.author_id,
             'synopsis': self.synopsis,
             'updata_time': self.update_time,
-            'comments_count': self.comments.count()
+            'comments_count': self.comments.count(),
             'collecters_count': self.collecters.count()
         }
     
@@ -386,7 +386,7 @@ class Novel(db.Model):
             'autor': self.author_id,
             'content': "请登录后阅读小说",
             'updata_time': self.update_time,
-            'comments_count': self.comments.count()
+            'comments_count': self.comments.count(),
             'collecters_count': self.collecters.count()
         }       
          

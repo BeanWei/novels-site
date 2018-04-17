@@ -4,7 +4,7 @@ from flask_login import current_user
 from werkzeug.routing import BaseConverter
 from .response_code import RET
 
-from .models import Permission
+from app.models import Permission
 
 class RegexConverter(BaseConverter):
     ''' U - N - U -S - E - D

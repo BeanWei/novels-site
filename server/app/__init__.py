@@ -38,8 +38,8 @@ def create_app():
     global db
     db.init_app(app)
 
-    global redis_conn
-    redis_conn = redis.StrictRedis(host=config[APP_ENV].REDIS_HOST, port=config[APP_ENV].REDIS_PORT)
+    # global redis_conn
+    # redis_conn = redis.StrictRedis(host=config[APP_ENV].REDIS_HOST, port=config[APP_ENV].REDIS_PORT)
 
     mail.init_app(app)
 
