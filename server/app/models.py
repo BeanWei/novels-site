@@ -90,7 +90,7 @@ class User(UserMixin, db.Model):
     nickname = db.Column(db.String, unique=True,index=True)
     sex = db.Column(db.String, default='Man')
     password_hash = db.Column(db.String(128))
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    #role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     confirmed = db.Column(db.Boolean, default=False) #验证Token
     join_time = db.Column(db,DateTime, default=datetime.utcnow)
     last_seen = db.Column(db,DateTime, default=datetime.utcnow)
@@ -294,6 +294,7 @@ class User(UserMixin, db.Model):
             'user_id': self.id,
             'nickname': self.nickname,
             'email': self.email,
+            'sex': self.sex,
             'avatar_url': self.avatar_hash
         }
 

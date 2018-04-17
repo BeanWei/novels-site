@@ -17,6 +17,7 @@ class BaseConfig:
     FLASK_MAIL_SENDER = "书匣子<157318439@qq.com>"
     FLASK_MAIL_SUBJECT_PREFIX = "[书匣子]"
 
+    ''' TODO: 运用redis缓存
     #配置Redis数据库
     REDIS_HOST = '127.0.0.1'
     REDIS_PORT = 6379
@@ -29,6 +30,7 @@ class BaseConfig:
     SESSION_USE_SIGNER = True
     # 設置session的会话的超时时长 ：一天,全局指定
     PERMANENT_SESSION_LIFETIME = 3600 * 24
+    '''
 
 class TestingConfig(BaseConfig):
     DEBUG = True

@@ -13,13 +13,15 @@ def signin():
     '''
     email = request.json.get('email')
     nickname = request.json.get('nickname')
+    sex = request.json.get('sex')
     password = request.json.get('password')
-    if not all([email, nickname, password]):
+    if not all([email, nickname, sex, password]):
         return jsonify(re_code=RET.PARAMERR, msg='参数不完整')
     #TODO: 在注册的时候直接检测用户所填写的信息是否已存在，提高用户体验
     user = User()
     user.email = email
     user.nickname = nickname
+    user.sex = sex
     user.password = password    #利用user model中的类属性方法加密用户的密码并存入数据库
     try:
         db.session.add(user)
@@ -53,6 +55,9 @@ def login():
         return jsonify(re_code=RET.NODATA, msg='用户不存在')
     if not user.verify_password(password):
         return jsonify(re_code=RET.PARAMERR, msg='帐户名或密码错误')
+
+    #更新最后一次登录时间
+    user.update_last_seen()
     
     session['user_id'] = user.id
     session['nickname'] = user.nickname
