@@ -5,10 +5,12 @@ from app.api_v1_0 import api
 from app.models import User
 from app.utils.common import login_required
 from app.utils.response_code import RET
+from app.utils.captcha import create_validate_code
 
 @api.route('/signin', methods=['POST'])
 def signin():
     '''用户注册接口
+    TODO: 添加图片验证
     :return 返回注册信息{'re_code': '0', 'msg': '注册成功'}
     '''
     email = request.json.get('email')
@@ -78,3 +80,17 @@ def logout():
 
     return jsonify(re_code=RET.OK, msg='退出成功')
         
+@api.route('/verify-code/')
+def verify_code():
+    """ 验证码 """
+    from io import BytesIO
+
+    output = BytesIO()
+    code_img, code_str = create_validate_code()
+    code_img.save(output, 'jpeg')
+    img_data=output.getvalue()
+    output.close()
+    response = make_response(img_data)
+    response.headers['Content-Type'] = 'image/jpg'
+    session['code_text'] = code_str
+    return response
