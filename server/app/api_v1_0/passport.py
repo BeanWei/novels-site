@@ -1,4 +1,4 @@
-from flask import request, jsonify, current_app, session
+from flask import request, jsonify, current_app, session, make_response
 
 from app import db
 from app.api_v1_0 import api
@@ -92,5 +92,5 @@ def verify_code():
     output.close()
     response = make_response(img_data)
     response.headers['Content-Type'] = 'image/jpg'
-    session['code_text'] = code_str
+    #session['code_text'] = code_str
     return response
