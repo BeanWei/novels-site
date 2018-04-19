@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import Axios from 'axios'
 import Login from '@/components/Login/login'
 import Register from '@/components/Login/register'
-import Index from '@/components/Home/index'
+import Home from '@/components/Home/home'
 
 Vue.use(Router)
 
@@ -21,9 +21,9 @@ export default new Router({
       component: Register
     },
     {
-      path: '/index',
-      name: 'index',
-      component: Index
+      path: '/novels',
+      name: 'novels',
+      component: Home
     },
     {
       path: '/novels',
