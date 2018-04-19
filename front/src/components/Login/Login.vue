@@ -1,8 +1,8 @@
 <template>
   <div class="loginWrapper">
     <div class="hd">
-      <h2>前端社团</h2>
-      <p>与世界分享你的知识、经验和见解</p>
+      <h2>书匣子</h2>
+      <p>带你去看浪漫的大千世界</p>
     </div>
     <div class="bd">
       <el-form :model="loginForm" :rules="loginRule" ref="loginForm">
