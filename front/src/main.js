@@ -2,24 +2,20 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
-import axios from './utils/fetch'
-import store from './store/store'
 import router from './router'
-import VuePraticles from 'vue-particles'
-import iview from 'iview'
-import 'iview/dist/styles/iview.css'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+import store from './vuex/store'
 
 Vue.config.productionTip = false
-Vue.use(VuePraticles)
-Vue.use(iview)
-Vue.prototype.$axios = axios
 
 /* eslint-disable no-new */
+Vue.use(ElementUI)
+
 new Vue({
   el: '#app',
-  axios,
-  store,
   router,
-  components: { App },
-  template: '<App/>'
+  store,
+  template: '<App/>',
+  components: { App }
 })

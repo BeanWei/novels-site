@@ -1,41 +1,48 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import store from '../store/store'
-import * as types from '../store/types'
-import {routers} from './router'
+import Axios from 'axios'
+import Login from '@/components/Login/login'
+import Register from '@/components/Login/register'
 
 Vue.use(Router)
 
-const RouterConfig = {
-  mode: 'history',
-  routes: routers,
-  scrollBehavior (to, from, savedPosition) {
-    return {x: 0, y: 0}
-  }
-}
-
-// 页面刷新时，重新赋值token
-if (window.localStorage.getItem('token')) {
-  store.commit(types.LOGIN, window.localStorage.getItem('token'))
-}
-
-const router = new Router(RouterConfig)
-
-router.beforeEach((to, from, next) => {
-  if (to.matched.some(r => r.meta.requireAuth)) {
-      if (store.state.token) {
-          next();
-      }
-      else {
-          next({
-              path: '/login',
-              query: {redirect: to.fullPath}
-          })
-      }
-  }
-  else {
-      next();
-  }
+export default new Router({
+  /* eslint-disable */
+  routes: [
+    {
+      path: '/',
+      name: 'Login',
+      component: Login
+    },
+    {
+      path: '/register',
+      name: 'Register',
+      component: Register
+    },
+    // {
+    //   path: '/p/index',
+    //   component: require('../components/Home/index.vue'),
+    //   beforeEnter: (to, from, next) => {
+    //     let pattern = /^(\/p)/g
+    //     let token = sessionStorage.getItem('accessToken')
+    //     if (pattern.test(to.path)) {
+    //       Axios.post('http://localhost:5000/api/isLogin', {access_token: token})
+    //       .then(res => {
+    //         if (res.data.code === 0) {
+    //           next()
+    //         } else {
+    //           next({name: 'Login'})
+    //         }
+    //       })
+    //       .catch(err => {
+    //         console.log(err)
+    //       })
+    //     }
+    //   }
+    // },
+    {
+      path: '*',
+      component: require('../components/NotFound.vue')
+    }
+  ]
 })
-
-export default router
