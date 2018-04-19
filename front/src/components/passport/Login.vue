@@ -2,7 +2,7 @@
   <div id="login">
     <Form ref="formCustom" :model="formCustom" :rules="ruleCustom" :label-width="80">
       <FormItem label="Email" prop="email">
-        <Input type="password" v-model="formCustom.email">
+        <Input type="email" v-model="formCustom.email">
           <Icon type="email" slot="prepend"></Icon>
         </Input>
       </FormItem>

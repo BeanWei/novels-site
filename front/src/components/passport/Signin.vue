@@ -2,20 +2,9 @@
   <div id="signin">
     <Form ref="formCustom" :model="formCustom" :rules="ruleCustom" :label-width="80">
       <FormItem label="Email" prop="email">
-        <Input type="password" v-model="formCustom.email">
+        <Input type="email" v-model="formCustom.email">
           <Icon type="email" slot="prepend"></Icon>
         </Input>
-      </FormItem>
-      <FormItem label="Nickename" prop="nickname">
-        <Input type="text" v-model="formCustom.nickname">
-          <Icon type="person" slot="prepend"></Icon>
-        </Input>
-      </FormItem>
-      <FormItem label="Gender" prop="gender">
-        <RadioGroup v-model="formValidate.gender">
-          <Radio label="male">Male</Radio>
-          <Radio label="female">Female</Radio>
-        </RadioGroup>
       </FormItem>
       <FormItem label="Password" prop="passwd">
         <Input type="password" v-model="formCustom.passwd">
